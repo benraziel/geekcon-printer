@@ -1,5 +1,4 @@
 package geekconprinter;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,8 +47,7 @@ public class Main extends BasicGame implements InputProviderListener
 		provider.bindCommand(new KeyControl(Input.KEY_RETURN), switchLayer);
 		provider.bindCommand(new KeyControl(Input.KEY_ESCAPE), quit);
 		
-		
-		toolpath.setToolpath(GCodeParser.parseFromFile("./src/resources/plus_vase_02.gcode"));
+		toolpath.setToolpath(GCodeParser.parseFromFile("./src/resources/geekcon0.gcode"));
 		totalTime = toolpath.getLayerLength(currentLayer) / feedrate;
 	}
 

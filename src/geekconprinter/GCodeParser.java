@@ -21,6 +21,8 @@ public class GCodeParser
 			ArrayList<Point2D> currLayer = new ArrayList<Point2D>();
 			double currX;
 			double currY;
+			double currZ = -1.0;
+			double nextZ;
 			Boolean zChanged;
 			Boolean hasX;
 			Boolean hasY;
@@ -31,6 +33,7 @@ public class GCodeParser
 				
 				currX = 0.0;
 				currY = 0.0;
+				nextZ = 0.0;
 				hasX = false;
 				hasY = false;
 				
@@ -77,8 +80,14 @@ public class GCodeParser
 					{
 						try
 						{
-							parseNumericToken(token); // just try to parse to see there's a valid number in the Z coordinate
-							zChanged = true;
+							nextZ = parseNumericToken(token); // just try to parse to see there's a valid number in the Z coordinate
+							System.out.println("z "+nextZ);
+							
+							if (Math.abs(nextZ - currZ) > 1e-4)
+							{
+								zChanged = true;
+								currZ = nextZ;
+							}
 						}
 						catch (Exception e)
 						{
