@@ -27,7 +27,6 @@ public class GCodeParser
 			
 			// iterate over the gcode lines
 			while ((line = bufferedReader.readLine()) != null) {
-				System.out.println(line);
 				zChanged = false;
 				
 				currX = 0.0;
