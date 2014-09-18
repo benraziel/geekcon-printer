@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
@@ -17,11 +18,15 @@ import org.newdawn.slick.command.KeyControl;
 
 public class Main extends BasicGame implements InputProviderListener 
 {
+	public static AppGameContainer appgc;
 	private ToolpathRenderer toolpath = new ToolpathRenderer();
 	private int currentLayer = 0;
 	private InputProvider provider;
 	private Command switchLayer = new BasicCommand("switchLayer");
-	
+	private Command quit = new BasicCommand("quit");
+	private float time = 0.0f;
+	private float totalTime = 0.0f;
+	private float feedrate = 40.0f;
 	public Main(String gamename)
 	{
 		super(gamename);
@@ -33,47 +38,54 @@ public class Main extends BasicGame implements InputProviderListener
 		provider.addListener(this);
 		
 		provider.bindCommand(new KeyControl(Input.KEY_RETURN), switchLayer);
+		provider.bindCommand(new KeyControl(Input.KEY_ESCAPE), quit);
 		
-		int c = 10;
-		int layers = 20;
-		double rad = 20.0;
-		ArrayList<ArrayList<Point2D>> path = new ArrayList<ArrayList<Point2D>>();
-		for (int l = 0; l < layers; ++l)
-		{
-			ArrayList<Point2D> layer = new ArrayList<Point2D>();
-			for (int i = 0; i < c; ++i)
-			{
-				double x = Math.cos(i / (float) (c - 1) * Math.PI * 2 + (double) l * 0.5) * rad;
-				double y = Math.sin(i / (float) (c - 1) * Math.PI * 2 + (double) l * 0.5) * rad;
-				Point2D p = new Point2D(0.0, 0.0);
-				p.x = x;
-				p.y = y;
-				layer.add(p);
-			}
-			path.add(layer);
-		}
 		
-		toolpath.setToolpath(path);
+		toolpath.setToolpath(GCodeParser.parseFromFile("./src/resources/plus_vase_02.gcode"));
 		
 	}
 
 	@Override
-	public void update(GameContainer gc, int i) throws SlickException {}
+	public void update(GameContainer gc, int delta) throws SlickException 
+	{
+		float passed = (float) delta / 1000.0f;
+		time += passed;
+		if (time > totalTime)
+		{
+			incLayer();
+			time = 0.0f;
+		}
+	}
+	
+	private void drawGrid(Graphics g, float grid)
+	{
+		g.setColor(new Color(0.7f, 0.7f, 0.7f));
+		g.setLineWidth(1.0f);
+		float size = 400.0f;
+		for (float i = -size * 0.5f; i < size * 0.5f; i += grid)
+		{
+			g.drawLine(i, -size * 0.5f, i, size * 0.5f);
+			g.drawLine(-size * 0.5f, i, size * 0.5f, i);
+		}
+	}
 
 	@Override
 	public void render(GameContainer gc, Graphics g) throws SlickException
 	{
+		
 		g.translate(gc.getWidth() * 0.5f, gc.getHeight() * 0.5f);
-		toolpath.render(g, currentLayer, 0.0f);
+		g.scale(5, 5);
+		drawGrid(g, 10.0f);
+		toolpath.render(g, currentLayer, time / totalTime);
 	}
 
 	public static void main(String[] args)
 	{
 		try
 		{
-			AppGameContainer appgc;
+			
 			appgc = new AppGameContainer(new Main("Simple Slick Game"));
-			appgc.setDisplayMode(640, 480, false);
+			appgc.setDisplayMode(800, 600, false);
 			appgc.setMouseGrabbed(false);
 			appgc.setShowFPS(false);
 			appgc.start();
@@ -89,12 +101,21 @@ public class Main extends BasicGame implements InputProviderListener
 		// TODO Auto-generated method stub
 		
 	}
-
+	private void incLayer()
+	{
+		currentLayer = (currentLayer + 1) % toolpath.getNumberOfLayers();
+		totalTime = toolpath.getLayerLength(currentLayer) / feedrate;
+	}
+	
 	@Override
-	public void controlReleased(Command arg0) {
-		if (arg0 == switchLayer)
+	public void controlReleased(Command cmd) {
+		if (cmd == switchLayer)
 		{
-			currentLayer = (currentLayer + 1) % toolpath.getNumberOfLayers();
+			incLayer();
+		}
+		else if (cmd == quit)
+		{
+			appgc.exit();
 		}
 		
 	}
