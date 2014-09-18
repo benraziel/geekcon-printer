@@ -45,7 +45,7 @@ public class Main extends BasicGame implements InputProviderListener
 			{
 				double x = Math.cos(i / (float) (c - 1) * Math.PI * 2 + (double) l * 0.5) * rad;
 				double y = Math.sin(i / (float) (c - 1) * Math.PI * 2 + (double) l * 0.5) * rad;
-				Point2D p = new Point2D();
+				Point2D p = new Point2D(0.0, 0.0);
 				p.x = x;
 				p.y = y;
 				layer.add(p);

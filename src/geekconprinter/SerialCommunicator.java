@@ -1,3 +1,4 @@
+package geekconprinter;
 import gnu.io.CommPortIdentifier;
 
 import java.util.ArrayList;

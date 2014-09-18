@@ -1,3 +1,4 @@
+package geekconprinter;
 public class Point2D
 {
 	public Point2D(double ptX, double ptY) {

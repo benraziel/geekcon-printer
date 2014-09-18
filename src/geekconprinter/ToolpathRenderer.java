@@ -9,7 +9,7 @@ public class ToolpathRenderer {
 	private ArrayList<ArrayList<Point2D>> toolpath;
 	private float totalLength;
 	private ArrayList<Float> lengths;
-	private Point2D marker = new Point2D();
+	private Point2D marker = new Point2D(0.0, 0.0);
 	public void setToolpath(ArrayList<ArrayList<Point2D>> toolpath)
 	{
 		this.toolpath = toolpath;
