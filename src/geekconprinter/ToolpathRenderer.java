@@ -39,7 +39,7 @@ public class ToolpathRenderer {
 		float targetLength = t * length;
 		
 		g.setColor(new Color(1.0f, 1.0f, 1.0f));
-		g.setLineWidth(2.0f);
+		g.setLineWidth(4.0f);
 		ArrayList<Point2D> path = toolpath.get(layer);
 		for (int i = 0; i < path.size() - 1; ++i)
 		{
@@ -66,6 +66,10 @@ public class ToolpathRenderer {
 				
 				g.setColor(new Color(0.5f, 0.5f, 0.5f));
 				g.drawLine((float) mid.x, (float) mid.y, (float) p2.x, (float) p2.y);
+				
+				float markerRadius = 1.0f;
+				g.setColor(new Color(0.2f, 0.6f, 1.0f));
+				g.fillOval((float) mid.x - markerRadius, (float) mid.y - markerRadius, (float) markerRadius * 2.0f, (float) markerRadius * 2.0f);
 			}
 			
 			curLength += l;
