@@ -1,6 +1,11 @@
 package geekconprinter;
+
+import java.io.File;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.swing.JFileChooser;
 
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
@@ -34,6 +39,8 @@ public class Main extends BasicGame implements InputProviderListener
 	private Button sendFooter = new Button(20, 55, 140, 25, "Send footer");
 	private Button startToolpath = new Button(20, 90, 140, 25, "Start");
 	private Button resetToolpath = new Button(20, 125, 140, 25, "Reset");
+	private Button openGCode = new Button(20, 160, 140, 25, "Open");
+	final JFileChooser fc = new JFileChooser();
 	public Main(String gamename)
 	{
 		super(gamename);
@@ -95,6 +102,7 @@ public class Main extends BasicGame implements InputProviderListener
 		sendFooter.render(g);
 		startToolpath.render(g);
 		resetToolpath.render(g);
+		openGCode.render(g);
 	}
 	
 
@@ -102,7 +110,6 @@ public class Main extends BasicGame implements InputProviderListener
 	{
 		try
 		{
-			
 			appgc = new AppGameContainer(new Main("Manual Printer"));
 			appgc.setDisplayMode(appgc.getScreenWidth(), appgc.getScreenHeight(), false);
 			appgc.setMouseGrabbed(false);
@@ -119,6 +126,7 @@ public class Main extends BasicGame implements InputProviderListener
 	{
 		if (sendHeader.checkClicked(button, x, y))
 		{
+			
 			System.out.println("send header");
 		}
 		else if (sendFooter.checkClicked(button, x, y))
@@ -136,8 +144,20 @@ public class Main extends BasicGame implements InputProviderListener
 			totalTime = toolpath.getLayerLength(currentLayer) / feedrate;
 			time = 0.0f;
 		}
+		else if (openGCode.checkClicked(button, x, y))
+		{
+			int returnVal = fc.showOpenDialog(null);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = fc.getSelectedFile();
+				System.out.println("Opening: " + file.getAbsolutePath() + ".");
+				toolpath.setToolpath(GCodeParser.parseFromFile(file.getAbsolutePath()));
+				paused = true;
+				currentLayer = initialLayer;
+				totalTime = toolpath.getLayerLength(currentLayer) / feedrate;
+				time = 0.0f;
+			}
+		}
 	}
-
 
 	@Override
 	public void controlPressed(Command arg0) {
