@@ -11,13 +11,15 @@ public class Main {
 	public static void main(String[] args) {
         System.out.println("Starting communicator"); // Display the string.
         System.out.println("Opening port..");
-        
+ 
+        /*
         List<String> ports = getAvailablePorts();
         
         for (String port : ports)
         {
         	System.out.println("portname: "+port);	
         }
+        */
         
         //SerialConnection connection = new SerialConnection();
         //connection.openPort(name, baud)
