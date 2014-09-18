@@ -20,15 +20,28 @@ public class SerialCommunicator {
         	System.out.println("portname: "+port);	
         }
         
-        String portName = "TODO";
+        String portName = "/dev/cu.usbmodem1421";
+        int baudRate = 115200;
         
         SerialConnection connection = new SerialConnection();
         try {
-			connection.openPort(portName, 9600);
+			connection.openPort(portName, baudRate);
 		} catch (Exception e) {
 			System.out.println("Serial connection - couldn't open port");
 			e.printStackTrace();
 		}
+        
+        System.out.println("going to sleep for 3 seconds..");
+        try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        System.out.println("woke up from sleep, about to send g28");
+        
+        connection.sendStringToComm("G1 Z150\n");
+        connection.closePort();
     }
 	
 	public static List<String> getAvailablePorts() {
