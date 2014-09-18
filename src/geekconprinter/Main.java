@@ -27,6 +27,7 @@ public class Main extends BasicGame implements InputProviderListener
 	private float time = 0.0f;
 	private float totalTime = 0.0f;
 	private float feedrate = 40.0f;
+	private Point2D marker = new Point2D(0.0f, 0.0f);
 	public Main(String gamename)
 	{
 		super(gamename);
@@ -77,6 +78,10 @@ public class Main extends BasicGame implements InputProviderListener
 		g.scale(5, 5);
 		drawGrid(g, 10.0f);
 		toolpath.render(g, currentLayer, time / totalTime);
+		
+		float markerRadius = 1.0f;
+		g.setColor(new Color(1.0f, 1.0f, 0.0f));
+		g.fillOval((float) marker.x - markerRadius, (float) marker.y - markerRadius, (float) markerRadius * 2.0f, (float) markerRadius * 2.0f);
 	}
 
 	public static void main(String[] args)

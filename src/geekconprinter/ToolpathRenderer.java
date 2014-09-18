@@ -8,7 +8,6 @@ import org.newdawn.slick.Graphics;
 public class ToolpathRenderer {
 	private ArrayList<ArrayList<Point2D>> toolpath;
 	
-	private Point2D marker = new Point2D(0.0, 0.0);
 	public void setToolpath(ArrayList<ArrayList<Point2D>> toolpath)
 	{
 		this.toolpath = toolpath;
@@ -50,30 +49,28 @@ public class ToolpathRenderer {
 			float l = (float) Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
 			if (curLength + l < targetLength)
 			{
-				g.setColor(new Color(1.0f, 0.0f, 0.0f));
+				g.setColor(new Color(0.0f, 1.0f, 0.0f));
 				g.drawLine((float) p1.x, (float) p1.y, (float) p2.x, (float) p2.y);
 			}
 			else if (curLength > targetLength)
 			{
-				g.setColor(new Color(0.0f, 1.0f, 0.0f));
+				g.setColor(new Color(0.5f, 0.5f, 0.5f));
 				g.drawLine((float) p1.x, (float) p1.y, (float) p2.x, (float) p2.y);
 			}
 			else
 			{
 				float r = (targetLength - curLength) / l;
 				Point2D mid = new Point2D((1.0f - r) * p1.x + r * p2.x, (1.0f - r) * p1.y + r * p2.y);
-				g.setColor(new Color(1.0f, 0.0f, 0.0f));
+				g.setColor(new Color(0.0f, 1.0f, 0.0f));
 				g.drawLine((float) p1.x, (float) p1.y, (float) mid.x, (float) mid.y);
 				
-				g.setColor(new Color(0.0f, 1.0f, 0.0f));
+				g.setColor(new Color(0.5f, 0.5f, 0.5f));
 				g.drawLine((float) mid.x, (float) mid.y, (float) p2.x, (float) p2.y);
 			}
 			
 			curLength += l;
 		}
 		
-		float markerRadius = 5.0f;
-		g.setColor(new Color(1.0f, 1.0f, 0.0f));
-		g.fillOval((float) marker.x - markerRadius, (float) marker.y - markerRadius, (float) markerRadius * 2.0f, (float) markerRadius * 2.0f);
+		
 	}
 }
