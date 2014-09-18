@@ -22,12 +22,12 @@
  */
 package com.willwinder.universalgcodesender;
 
-import com.willwinder.universalgcodesender.i18n.Localization;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,6 +35,8 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.willwinder.universalgcodesender.i18n.Localization;
 
 /**
  *
@@ -82,11 +84,19 @@ public class SerialConnection extends Connection implements SerialPortEventListe
             this.commPort = portIdentifier.open(this.getClass().getName(), 2000);
 
             SerialPort serialPort = (SerialPort) this.commPort;
-            serialPort.setSerialPortParams(baud,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
+            serialPort.setSerialPortParams(baud,serialPort.getDataBits(),serialPort.getStopBits(),serialPort.getParity());
 
             this.in = serialPort.getInputStream();
             this.out = serialPort.getOutputStream();
-
+            
+//            // print the input stream
+//            BufferedReader in = new BufferedReader(new InputStreamReader(this.in));
+//            String inputLine;
+//            while ((inputLine = in.readLine()) != null)
+//            {
+//            	System.out.println(inputLine);
+//            }
+            
             serialPort.addEventListener(this);
             serialPort.notifyOnDataAvailable(true);  
             serialPort.notifyOnBreakInterrupt(true);
@@ -146,13 +156,19 @@ public class SerialConnection extends Connection implements SerialPortEventListe
      */
     @Override
     public void serialEvent(SerialPortEvent evt) {
-        if (inputBuffer == null) {
+    	// TODO BEN - return prematurely
+    	return;
+    	
+    	/*
+    	if (inputBuffer == null) {
             inputBuffer = new StringBuilder();
         }
-        
+    	
         // Check for evt == null to allow faking a call to this event.
         if (evt == null || evt.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
-            try
+            System.out.println("got event from port! "+evt.getEventType());
+        	
+        	try
             {
                 int availableBytes = in.available();
                 if (availableBytes > 0) {
@@ -184,6 +200,7 @@ public class SerialConnection extends Connection implements SerialPortEventListe
                 System.exit(-1);
             }
         }
+        */
     }
 
     @Override
