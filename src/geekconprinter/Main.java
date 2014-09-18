@@ -25,15 +25,16 @@ public class Main extends BasicGame implements InputProviderListener
 	private InputProvider provider;
 	private Command switchLayer = new BasicCommand("switchLayer");
 	private Command quit = new BasicCommand("quit");
-	private Command sendHeader = new BasicCommand("sendHeader");
-	private Command sendFooter = new BasicCommand("sendFooter");
-	private Command startToolpath = new BasicCommand("startToolpath");
-	private Command resetToolpath = new BasicCommand("resetToolpath");
+	
 	private float time = 0.0f;
 	private float totalTime = 0.0f;
 	private float feedrate = 40.0f;
 	private Point2D marker = new Point2D(0.0f, 0.0f);
 	private boolean paused = true;
+	private Button sendHeader = new Button(20, 20, 140, 25, "Send header");
+	private Button sendFooter = new Button(20, 55, 140, 25, "Send footer");
+	private Button startToolpath = new Button(20, 90, 140, 25, "Start");
+	private Button resetToolpath = new Button(20, 125, 140, 25, "Reset");
 	public Main(String gamename)
 	{
 		super(gamename);
@@ -46,10 +47,6 @@ public class Main extends BasicGame implements InputProviderListener
 		
 		provider.bindCommand(new KeyControl(Input.KEY_RETURN), switchLayer);
 		provider.bindCommand(new KeyControl(Input.KEY_ESCAPE), quit);
-		provider.bindCommand(new KeyControl(Input.KEY_1), sendHeader);
-		provider.bindCommand(new KeyControl(Input.KEY_2), sendFooter);
-		provider.bindCommand(new KeyControl(Input.KEY_S), startToolpath);
-		provider.bindCommand(new KeyControl(Input.KEY_R), resetToolpath);
 		
 		
 		toolpath.setToolpath(GCodeParser.parseFromFile("./src/resources/plus_vase_02.gcode"));
@@ -95,7 +92,13 @@ public class Main extends BasicGame implements InputProviderListener
 		float markerRadius = 1.0f;
 		g.setColor(new Color(1.0f, 0.0f, 0.0f));
 		g.fillOval((float) marker.x - markerRadius, (float) marker.y - markerRadius, (float) markerRadius * 2.0f, (float) markerRadius * 2.0f);
+		g.resetTransform();
+		sendHeader.render(g);
+		sendFooter.render(g);
+		startToolpath.render(g);
+		resetToolpath.render(g);
 	}
+	
 
 	public static void main(String[] args)
 	{
@@ -113,6 +116,30 @@ public class Main extends BasicGame implements InputProviderListener
 			Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
+
+	public void mousePressed(int button, int x, int y)
+	{
+		if (sendHeader.checkClicked(button, x, y))
+		{
+			System.out.println("send header");
+		}
+		else if (sendFooter.checkClicked(button, x, y))
+		{
+			paused = true;
+		}
+		else if (startToolpath.checkClicked(button, x, y))
+		{
+			paused = false;
+		}
+		else if (resetToolpath.checkClicked(button, x, y))
+		{
+			paused = true;
+			currentLayer = initialLayer;
+			totalTime = toolpath.getLayerLength(currentLayer) / feedrate;
+			time = 0.0f;
+		}
+	}
+
 
 	@Override
 	public void controlPressed(Command arg0) {
@@ -139,24 +166,7 @@ public class Main extends BasicGame implements InputProviderListener
 		{
 			appgc.exit();
 		}
-		else if (cmd == sendHeader)
-		{
-			
-		}
-		else if (cmd == sendFooter)
-		{
-			paused = true;
-		}
-		else if (cmd == startToolpath)
-		{
-			paused = false;
-		}
-		else if (cmd == resetToolpath)
-		{
-			paused = true;
-			currentLayer = initialLayer;
-			time = 0.0f;
-		}
+		
 		
 	}
 }
