@@ -19,8 +19,15 @@ public class SerialCommunicator {
         	System.out.println("portname: "+port);	
         }
         
-        //SerialConnection connection = new SerialConnection();
-        //connection.openPort(name, baud)
+        String portName = "TODO";
+        
+        SerialConnection connection = new SerialConnection();
+        try {
+			connection.openPort(portName, 9600);
+		} catch (Exception e) {
+			System.out.println("Serial connection - couldn't open port");
+			e.printStackTrace();
+		}
     }
 	
 	public static List<String> getAvailablePorts() {
