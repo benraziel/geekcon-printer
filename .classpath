@@ -57,5 +57,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="jars/cv/javacpp.jar"/>
 	<classpathentry kind="lib" path="jars/cv/javacv.jar"/>
+	<classpathentry kind="lib" path="jars/cv/opencv-macosx-x86_64.jar"/>
+	<classpathentry kind="lib" path="jars/cv/opencv.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
