@@ -8,7 +8,64 @@ import java.util.List;
 import com.willwinder.universalgcodesender.SerialConnection;
 
 public class SerialCommunicator {
-    
+	private SerialConnection connection;
+	private String commandTerminator = "\n";
+    private String portName = "/dev/cu.usbmodem1421";
+    private int baudRate = 115200;
+	
+    /**
+     * Opens the connection to the printer.
+     * portName is hardcoded to work with arduino on a mac
+     * baudrate is set according to what the custom firmware is set to. 
+     */
+	public void openConnection()
+	{	
+		this.connection = new SerialConnection();
+		
+        try {
+			connection.openPort(portName, baudRate);
+		} catch (Exception e) {
+			System.out.println("Serial connection - couldn't open port");
+			e.printStackTrace();
+		}
+        
+        System.out.println("going to sleep for a second..");
+        try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Closes the connection to the printer
+	 */
+	public void closeConnection()
+	{
+		connection.closePort();
+	}
+	
+	/**
+	 * Sends an array of gcode commands to the printer.
+	 */
+	public void sendCommands(ArrayList<String> commands)
+	{
+		for (String command : commands)
+		{
+			sendCommand(command);
+		}
+	}
+
+	/**
+	 * Sends an single gcode command to the printer.
+	 */
+	public void sendCommand(String command)
+	{
+		connection.sendStringToComm(command + commandTerminator);
+	}
+	
+	/* OLD TEST CODE - opens a port and sends a single command
 	public static void main(String[] args) {
         System.out.println("Starting communicator"); // Display the string.
         System.out.println("Opening port..");
@@ -43,6 +100,7 @@ public class SerialCommunicator {
         connection.sendStringToComm("G1 Z150\n");
         connection.closePort();
     }
+	*/
 	
 	public static List<String> getAvailablePorts() {
 
