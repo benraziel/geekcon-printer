@@ -6,6 +6,7 @@ import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
 import org.opencv.core.*;
 
 public class CameraTest {
@@ -18,7 +19,7 @@ public class CameraTest {
 	
 	    VideoCapture camera = new VideoCapture(0);
 	    try {
-			Thread.sleep(1000);
+			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -32,25 +33,22 @@ public class CameraTest {
 	        System.out.println("Camera OK?");
 	    }
 	
-	    Mat frame = new Mat();
-	
-	    //camera.grab();
-	    //System.out.println("Frame Grabbed");
-	    //camera.retrieve(frame);
-	    //System.out.println("Frame Decoded");
-	
-	    camera.read(frame);
+	    //Mat frame = new Mat();
+	    //camera.read(frame);
+	    
+	    Mat frame = Highgui.imread("./camera_pink.jpg"); 
 	    System.out.println("Frame Obtained");
 	
-	    
-	    
-	    /* No difference
 	    camera.release();
-	    */
-	
 	    System.out.println("Captured Frame Width " + frame.width());
 	
-	    Highgui.imwrite("camera.jpg", getThresholdedImage(frame));
+	    // apply thresholding on the image, to get a background mask
+	    Mat threshImage = getThresholdedImage(frame);
+	    //Mat dilated = dilateMask(threshImage);
+	    
+	    // dilate the mask
+	    
+	    Highgui.imwrite("from_camera.jpg", erodeImage(threshImage));
 	    System.out.println("OK");
     }
     
@@ -60,10 +58,53 @@ public class CameraTest {
     	Mat imageHSV = cameraFrame.clone();
     	
     	Imgproc.cvtColor(cameraFrame, imageHSV, Imgproc.COLOR_RGB2HSV);
-    	Core.inRange(imageHSV, new Scalar(0.0), new Scalar(100.0), result);
+    	
+    	// pink
+    	Core.inRange(imageHSV, new Scalar(130.0, 40.0, 210.0), new Scalar(170.0, 70.0, 255.0), result);
+    	
+    	// white
+    	//Core.inRange(imageHSV, new Scalar(0.0, 0.0, 230.0), new Scalar(180.0, 255.0, 255.0), result);
     	
     	return result;
     }
+    
+    private static Mat dilateMask(Mat inputMask)
+    {
+    	Mat result = inputMask.clone();
+    	Imgproc.dilate(inputMask, result, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(5,5)));
+    	
+    	return result;
+    }
+
+    private static Mat erodeImage(Mat inputImage)
+    {
+    	Mat result = inputImage.clone();
+    	Imgproc.erode(inputImage, result, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(5,5)));
+    	
+    	return result;
+    }
+    
+    private static Point2D getExtruderPosition(Mat cameraFrame)
+    {
+    	Mat thresholdImage = getThresholdedImage(cameraFrame);
+    	
+    	Moments m = Imgproc.moments(thresholdImage);
+    	double area = m.get_m00();
+    	
+    	double posX = m.get_m10() / area;
+    	double posY = m.get_m01() / area;
+    	
+    	return new Point2D(posX, posY);
+    }
+//    
+// cvMoments(imgYellowThresh, moments, 1);
+//
+// // The actual moment values
+// double moment10 = cvGetSpatialMoment(moments, 1, 0);
+// double moment01 = cvGetSpatialMoment(moments, 0, 1);
+//
+// double area = cvGetCentralMoment(moments, 0, 0);
+
     
 //    IplImage* GetThresholdedImage(IplImage* img)
 //    {
