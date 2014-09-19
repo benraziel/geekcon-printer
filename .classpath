@@ -55,8 +55,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="geekcon-printer/jars/slick"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="jars/cv/opencv-macosx-x86_64.jar"/>
-	<classpathentry kind="lib" path="jars/cv/opencv.jar"/>
 	<classpathentry kind="lib" path="jars/opencv/opencv-249.jar">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="geekcon-printer/jars/opencv"/>
