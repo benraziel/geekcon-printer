@@ -28,6 +28,8 @@ import org.newdawn.slick.imageout.ImageIOWriter;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.util.BufferedImageUtil;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 public class Main extends BasicGame implements InputProviderListener 
 {
@@ -50,6 +52,10 @@ public class Main extends BasicGame implements InputProviderListener
 	private Button resetToolpath = new Button(20, 125, 140, 25, "Reset");
 	private Button openGCode = new Button(20, 160, 140, 25, "Open");
 	final JFileChooser fc = new JFileChooser();
+	private Point2D marker0 = new Point2D(0.0, 0.0);
+	private Point2D marker1 = new Point2D(0.0, 0.0);
+	private Point2D marker2 = new Point2D(0.0, 0.0);
+	private int frameNumber = 0;
 	
 	CameraFeed camera;
 	
@@ -101,6 +107,7 @@ public class Main extends BasicGame implements InputProviderListener
 	@Override
 	public void render(GameContainer gc, Graphics g) throws SlickException
 	{
+		frameNumber++;
 		g.setAntiAlias(true);
 		g.translate(gc.getWidth() * 0.5f, gc.getHeight() * 0.5f);
 		g.scale(5, 5);
@@ -110,6 +117,8 @@ public class Main extends BasicGame implements InputProviderListener
 		float markerRadius = 1.0f;
 		g.setColor(new Color(1.0f, 0.0f, 0.0f));
 		g.fillOval((float) marker.x - markerRadius, (float) marker.y - markerRadius, (float) markerRadius * 2.0f, (float) markerRadius * 2.0f);
+		g.fillOval((float) 0 - markerRadius, (float) 0 - markerRadius, (float) markerRadius * 2.0f, (float) markerRadius * 2.0f);
+		g.resetTransform();
 		g.resetTransform();
 		sendHeader.render(g);
 		sendFooter.render(g);
@@ -118,12 +127,32 @@ public class Main extends BasicGame implements InputProviderListener
 		openGCode.render(g);
 		
 		// render camera frame
-		Mat img = camera.captureExtruderImage();
+		Mat img = camera.captureExtruderImageRaw();
+		Imgproc.medianBlur(img, img, 11);
 		//Point2D loc = camera.getExtruderPosition(img);
 		//marker.x = loc.x / 60.0f * 10.0f;
-		marker = camera.getExtruderLocation();
-		marker.x = 0;//marker.x / 60.0 * 10.0;
-		marker.y = marker.y / 60.0 * 10.0;
+		Point2D curFrameMarker = camera.getExtruderLocation();
+		
+		curFrameMarker.x = curFrameMarker.x / 30.0 * 10.0;
+		curFrameMarker.y = curFrameMarker.y / 30.0 * 10.0;
+		curFrameMarker.x -= 70.0;
+		curFrameMarker.y -= 58.0;
+		if (frameNumber % 3 == 0)
+		{
+			marker0 = curFrameMarker;
+		}
+		else if (frameNumber % 3 == 1)
+		{
+			marker1 = curFrameMarker;
+		}
+		else if (frameNumber % 3 == 2)
+		{
+			marker2 = curFrameMarker;
+		}
+		marker.x = (marker0.x + marker1.x + marker2.x) / 3.0;
+		marker.y = (marker0.y + marker1.y + marker2.y) / 3.0;
+		
+		
 		BufferedImage fromCamera = camera.toBufferedImage(img);
 		try {
 			Texture texture = BufferedImageUtil.getTexture("dummy", fromCamera);

@@ -16,7 +16,7 @@ import org.opencv.imgproc.Moments;
 
 public class CameraFeed {
 	private VideoCapture videoCapture;
-	private Mat maskY;
+	private Mat maskY, maskX;
     public CameraFeed()
     {
 	    System.out.println("Hello, OpenCV");
@@ -41,6 +41,9 @@ public class CameraFeed {
 	    
 	    maskY = Highgui.imread("./src/resources/mask_y.png");
     	Imgproc.cvtColor(maskY, maskY, Imgproc.COLOR_RGB2GRAY);
+    	
+    	maskX = Highgui.imread("./src/resources/mask_x.png");
+    	Imgproc.cvtColor(maskX, maskX, Imgproc.COLOR_RGB2GRAY);
     }
     
     public BufferedImage captureFrame()
@@ -69,7 +72,7 @@ public class CameraFeed {
     {
     	Mat frame = new Mat();
 	    videoCapture.read(frame);
-	    
+	    Imgproc.medianBlur(frame, frame, 11);
 	    Mat threshImageX = getThresholdedImageX(frame);
 	    Mat erodedX = erodeImage(threshImageX);
 	    
@@ -122,7 +125,7 @@ public class CameraFeed {
 	    System.out.println("Captured Frame Width " + frame.width());
 	
 	    // apply thresholding on the image, to get a background mask
-	    Mat threshImage = getThresholdedImageX(frame);
+	    //Mat threshImage = getThresholdedImageX(frame);
 	    //Mat dilated = dilateMask(threshImage);
 	    
 	    // dilate the mask
@@ -131,15 +134,21 @@ public class CameraFeed {
 	    System.out.println("OK");
     }
     
-    private static Mat getThresholdedImageX(Mat cameraFrame)
+    private Mat getThresholdedImageX(Mat cameraFrame)
     {
     	Mat result = new Mat(cameraFrame.size(), CvType.CV_8UC1);
     	Mat imageHSV = cameraFrame.clone();
+    	imageHSV.setTo(new Scalar(0.0, 0.0, 0.0));
+    	cameraFrame.copyTo(imageHSV, maskX);
     	
-    	Imgproc.cvtColor(cameraFrame, imageHSV, Imgproc.COLOR_RGB2HSV);
+    	Imgproc.cvtColor(imageHSV, imageHSV, Imgproc.COLOR_RGB2HSV);
     	
     	// pink
-    	Core.inRange(imageHSV, new Scalar(130.0, 40.0, 210.0), new Scalar(170.0, 70.0, 255.0), result);
+    	//Core.inRange(imageHSV, new Scalar(130.0, 40.0, 210.0), new Scalar(170.0, 70.0, 255.0), result);
+    	
+    	// green
+    	Core.inRange(imageHSV, new Scalar(20.0, 100.0, 210.0), new Scalar(120.0, 255.0, 255.0), result);
+    	
     	
     	// white
     	//Core.inRange(imageHSV, new Scalar(0.0, 0.0, 230.0), new Scalar(180.0, 255.0, 255.0), result);
@@ -149,7 +158,6 @@ public class CameraFeed {
     
     private Mat getThresholdedImageY(Mat cameraFrame)
     {
-    	
     	Mat result = new Mat(cameraFrame.size(), CvType.CV_8UC1);
     	Mat imageHSV = cameraFrame.clone();
     	imageHSV.setTo(new Scalar(0.0, 0.0, 0.0));
@@ -157,7 +165,7 @@ public class CameraFeed {
     	
     	Imgproc.cvtColor(imageHSV, imageHSV, Imgproc.COLOR_RGB2HSV);
     	
-    	// pink
+    	// green
     	Core.inRange(imageHSV, new Scalar(20.0, 100.0, 210.0), new Scalar(120.0, 255.0, 255.0), result);
     	
     	// white
@@ -177,7 +185,7 @@ public class CameraFeed {
     private static Mat erodeImage(Mat inputImage)
     {
     	Mat result = inputImage.clone();
-    	Imgproc.erode(inputImage, result, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(5,5)));
+    	Imgproc.erode(inputImage, result, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(15,15)));
     	
     	return result;
     }
