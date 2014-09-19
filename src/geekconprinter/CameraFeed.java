@@ -1,17 +1,65 @@
 package geekconprinter;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
-import org.opencv.core.*;
 
-public class CameraTest {
+public class CameraFeed {
+	private VideoCapture videoCapture;
+	
+    public CameraFeed()
+    {
+	    System.out.println("Hello, OpenCV");
+	    // Load the native library.
+	    System.loadLibrary("opencv_java249");
+	
+	    videoCapture = new VideoCapture(0);
+	    try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
+	    videoCapture.open(0); //Useless
+	    if(!videoCapture.isOpened()){
+	        System.out.println("Camera Error");
+	    }
+	    else{
+	        System.out.println("Camera OK?");
+	    }    	
+    }
+    
+    public BufferedImage captureFrame()
+    {
+	    Mat frame = new Mat();
+	    videoCapture.read(frame);
+	    
+	    return toBufferedImage(frame);
+    }
 
-    public static void main (String args[]){
+    public BufferedImage captureExtruderImage()
+    {
+	    Mat frame = new Mat();
+	    videoCapture.read(frame);
+	
+	    Mat threshImage = getThresholdedImage(frame);
+	    Mat eroded = erodeImage(threshImage);
+	    
+	    return toBufferedImage(eroded);
+    }
+    
+	public static void main (String args[]){
 
 	    System.out.println("Hello, OpenCV");
 	    // Load the native library.
@@ -96,24 +144,18 @@ public class CameraTest {
     	
     	return new Point2D(posX, posY);
     }
-//    
-// cvMoments(imgYellowThresh, moments, 1);
-//
-// // The actual moment values
-// double moment10 = cvGetSpatialMoment(moments, 1, 0);
-// double moment01 = cvGetSpatialMoment(moments, 0, 1);
-//
-// double area = cvGetCentralMoment(moments, 0, 0);
 
-    
-//    IplImage* GetThresholdedImage(IplImage* img)
-//    {
-//        // Convert the image into an HSV image
-//        IplImage* imgHSV = cvCreateImage(cvGetSize(img), 8, 3);
-//        cvCvtColor(img, imgHSV, CV_BGR2HSV);
-//        IplImage* imgThreshed = cvCreateImage(cvGetSize(img), 8, 1);
-//        cvInRangeS(imgHSV, cvScalar(20, 100, 100), cvScalar(30, 255, 255), imgThreshed);
-//        cvReleaseImage(&imgHSV);
-//        return imgThreshed;
-//    }
+    public BufferedImage toBufferedImage(Mat m){
+        int type = BufferedImage.TYPE_BYTE_GRAY;
+        if ( m.channels() > 1 ) {
+            type = BufferedImage.TYPE_3BYTE_BGR;
+        }
+        int bufferSize = m.channels()*m.cols()*m.rows();
+        byte [] b = new byte[bufferSize];
+        m.get(0,0,b); // get all the pixels
+        BufferedImage image = new BufferedImage(m.cols(),m.rows(), type);
+        final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        System.arraycopy(b, 0, targetPixels, 0, b.length);  
+        return image;
+    }
 } // end class

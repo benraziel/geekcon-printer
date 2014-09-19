@@ -1,10 +1,14 @@
 package geekconprinter;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 
 import org.newdawn.slick.AppGameContainer;
@@ -12,6 +16,7 @@ import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.command.BasicCommand;
@@ -19,6 +24,9 @@ import org.newdawn.slick.command.Command;
 import org.newdawn.slick.command.InputProvider;
 import org.newdawn.slick.command.InputProviderListener;
 import org.newdawn.slick.command.KeyControl;
+import org.newdawn.slick.imageout.ImageIOWriter;
+import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.util.BufferedImageUtil;
 
 public class Main extends BasicGame implements InputProviderListener 
 {
@@ -41,6 +49,9 @@ public class Main extends BasicGame implements InputProviderListener
 	private Button resetToolpath = new Button(20, 125, 140, 25, "Reset");
 	private Button openGCode = new Button(20, 160, 140, 25, "Open");
 	final JFileChooser fc = new JFileChooser();
+	
+	CameraFeed camera;
+	
 	public Main(String gamename)
 	{
 		super(gamename);
@@ -56,6 +67,7 @@ public class Main extends BasicGame implements InputProviderListener
 		
 		toolpath.setToolpath(GCodeParser.parseFromFile("./src/resources/geekcon0.gcode"));
 		totalTime = toolpath.getLayerLength(currentLayer) / feedrate;
+		camera = new CameraFeed();
 	}
 
 	@Override
@@ -103,6 +115,19 @@ public class Main extends BasicGame implements InputProviderListener
 		startToolpath.render(g);
 		resetToolpath.render(g);
 		openGCode.render(g);
+		
+		// render camera frame
+		BufferedImage fromCamera = camera.captureExtruderImage();
+		try {
+			Texture texture = BufferedImageUtil.getTexture("dummy", fromCamera);
+			Image slickImage = new Image(texture);
+			
+			// write slick image to file
+			g.drawImage(slickImage, 0.0f, 0.0f);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 
