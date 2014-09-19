@@ -16,7 +16,7 @@ import org.opencv.imgproc.Moments;
 
 public class CameraFeed {
 	private VideoCapture videoCapture;
-	
+	private Mat maskY;
     public CameraFeed()
     {
 	    System.out.println("Hello, OpenCV");
@@ -37,7 +37,10 @@ public class CameraFeed {
 	    }
 	    else{
 	        System.out.println("Camera OK?");
-	    }    	
+	    }   
+	    
+	    maskY = Highgui.imread("./src/resources/mask_y.png");
+    	Imgproc.cvtColor(maskY, maskY, Imgproc.COLOR_RGB2GRAY);
     }
     
     public BufferedImage captureFrame()
@@ -59,7 +62,24 @@ public class CameraFeed {
 	    Mat threshImageY = getThresholdedImageY(frame);
 	    Mat erodedY = erodeImage(threshImageY);
 	    
-	    return erodedY;
+	    return erodedX;
+    }
+    
+    public Point2D getExtruderLocation()
+    {
+    	Mat frame = new Mat();
+	    videoCapture.read(frame);
+	    
+	    Mat threshImageX = getThresholdedImageX(frame);
+	    Mat erodedX = erodeImage(threshImageX);
+	    
+	    Mat threshImageY = getThresholdedImageY(frame);
+	    Mat erodedY = erodeImage(threshImageY);
+	    
+	    double x = getExtruderPosition(erodedX).x;
+	    double y = getExtruderPosition(erodedY).y;
+	    
+	    return  new Point2D(x, y);
     }
     
     public Mat captureExtruderImageRaw()
@@ -127,12 +147,15 @@ public class CameraFeed {
     	return result;
     }
     
-    private static Mat getThresholdedImageY(Mat cameraFrame)
+    private Mat getThresholdedImageY(Mat cameraFrame)
     {
+    	
     	Mat result = new Mat(cameraFrame.size(), CvType.CV_8UC1);
     	Mat imageHSV = cameraFrame.clone();
+    	imageHSV.setTo(new Scalar(0.0, 0.0, 0.0));
+    	cameraFrame.copyTo(imageHSV, maskY);
     	
-    	Imgproc.cvtColor(cameraFrame, imageHSV, Imgproc.COLOR_RGB2HSV);
+    	Imgproc.cvtColor(imageHSV, imageHSV, Imgproc.COLOR_RGB2HSV);
     	
     	// pink
     	Core.inRange(imageHSV, new Scalar(20.0, 100.0, 210.0), new Scalar(120.0, 255.0, 255.0), result);

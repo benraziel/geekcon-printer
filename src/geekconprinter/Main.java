@@ -121,13 +121,16 @@ public class Main extends BasicGame implements InputProviderListener
 		Mat img = camera.captureExtruderImage();
 		//Point2D loc = camera.getExtruderPosition(img);
 		//marker.x = loc.x / 60.0f * 10.0f;
+		marker = camera.getExtruderLocation();
+		marker.x = 0;//marker.x / 60.0 * 10.0;
+		marker.y = marker.y / 60.0 * 10.0;
 		BufferedImage fromCamera = camera.toBufferedImage(img);
 		try {
 			Texture texture = BufferedImageUtil.getTexture("dummy", fromCamera);
 			Image slickImage = new Image(texture);
 			
 			// write slick image to file
-			g.drawImage(slickImage, 0.0f, 0.0f);
+			//g.drawImage(slickImage, 0.0f, 0.0f);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
