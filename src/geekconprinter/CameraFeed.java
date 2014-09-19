@@ -48,15 +48,26 @@ public class CameraFeed {
 	    return toBufferedImage(frame);
     }
 
-    public BufferedImage captureExtruderImage()
+    public Mat captureExtruderImage()
     {
 	    Mat frame = new Mat();
 	    videoCapture.read(frame);
-	
-	    Mat threshImage = getThresholdedImage(frame);
-	    Mat eroded = erodeImage(threshImage);
 	    
-	    return toBufferedImage(eroded);
+	    Mat threshImageX = getThresholdedImageX(frame);
+	    Mat erodedX = erodeImage(threshImageX);
+	    
+	    Mat threshImageY = getThresholdedImageY(frame);
+	    Mat erodedY = erodeImage(threshImageY);
+	    
+	    return erodedY;
+    }
+    
+    public Mat captureExtruderImageRaw()
+    {
+	    Mat frame = new Mat();
+	    videoCapture.read(frame);
+	    
+	   return frame;
     }
     
 	public static void main (String args[]){
@@ -81,26 +92,26 @@ public class CameraFeed {
 	        System.out.println("Camera OK?");
 	    }
 	
-	    //Mat frame = new Mat();
-	    //camera.read(frame);
+	    Mat frame = new Mat();
+	    camera.read(frame);
 	    
-	    Mat frame = Highgui.imread("./camera_pink.jpg"); 
+	    //Mat frame = Highgui.imread("./camera_pink.jpg"); 
 	    System.out.println("Frame Obtained");
 	
 	    camera.release();
 	    System.out.println("Captured Frame Width " + frame.width());
 	
 	    // apply thresholding on the image, to get a background mask
-	    Mat threshImage = getThresholdedImage(frame);
+	    Mat threshImage = getThresholdedImageX(frame);
 	    //Mat dilated = dilateMask(threshImage);
 	    
 	    // dilate the mask
 	    
-	    Highgui.imwrite("from_camera.jpg", erodeImage(threshImage));
+	    Highgui.imwrite("from_camera.jpg", frame);
 	    System.out.println("OK");
     }
     
-    private static Mat getThresholdedImage(Mat cameraFrame)
+    private static Mat getThresholdedImageX(Mat cameraFrame)
     {
     	Mat result = new Mat(cameraFrame.size(), CvType.CV_8UC1);
     	Mat imageHSV = cameraFrame.clone();
@@ -109,6 +120,22 @@ public class CameraFeed {
     	
     	// pink
     	Core.inRange(imageHSV, new Scalar(130.0, 40.0, 210.0), new Scalar(170.0, 70.0, 255.0), result);
+    	
+    	// white
+    	//Core.inRange(imageHSV, new Scalar(0.0, 0.0, 230.0), new Scalar(180.0, 255.0, 255.0), result);
+    	
+    	return result;
+    }
+    
+    private static Mat getThresholdedImageY(Mat cameraFrame)
+    {
+    	Mat result = new Mat(cameraFrame.size(), CvType.CV_8UC1);
+    	Mat imageHSV = cameraFrame.clone();
+    	
+    	Imgproc.cvtColor(cameraFrame, imageHSV, Imgproc.COLOR_RGB2HSV);
+    	
+    	// pink
+    	Core.inRange(imageHSV, new Scalar(20.0, 100.0, 210.0), new Scalar(120.0, 255.0, 255.0), result);
     	
     	// white
     	//Core.inRange(imageHSV, new Scalar(0.0, 0.0, 230.0), new Scalar(180.0, 255.0, 255.0), result);
@@ -132,10 +159,8 @@ public class CameraFeed {
     	return result;
     }
     
-    private static Point2D getExtruderPosition(Mat cameraFrame)
-    {
-    	Mat thresholdImage = getThresholdedImage(cameraFrame);
-    	
+    public Point2D getExtruderPosition(Mat thresholdImage)
+    {	
     	Moments m = Imgproc.moments(thresholdImage);
     	double area = m.get_m00();
     	

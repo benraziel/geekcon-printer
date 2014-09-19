@@ -27,6 +27,7 @@ import org.newdawn.slick.command.KeyControl;
 import org.newdawn.slick.imageout.ImageIOWriter;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.util.BufferedImageUtil;
+import org.opencv.core.Mat;
 
 public class Main extends BasicGame implements InputProviderListener 
 {
@@ -117,7 +118,10 @@ public class Main extends BasicGame implements InputProviderListener
 		openGCode.render(g);
 		
 		// render camera frame
-		BufferedImage fromCamera = camera.captureExtruderImage();
+		Mat img = camera.captureExtruderImage();
+		//Point2D loc = camera.getExtruderPosition(img);
+		//marker.x = loc.x / 60.0f * 10.0f;
+		BufferedImage fromCamera = camera.toBufferedImage(img);
 		try {
 			Texture texture = BufferedImageUtil.getTexture("dummy", fromCamera);
 			Image slickImage = new Image(texture);
